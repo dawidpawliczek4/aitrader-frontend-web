@@ -5,13 +5,13 @@ import { z } from "zod";
 import { markRaw } from "vue";
 
 async function safeApiCall<T>(
-  apiCall: () => Promise<{ data: ApiResponse<unknown> }>,
+  apiCall: () => Promise<ApiResponse<T>>,
   schema: z.ZodSchema<T>
 ): Promise<T> {
   try {
-    const response = await apiCall();
-    const apiResponse = response.data;
-
+    const apiResponse = await apiCall();
+    console.log(apiResponse)
+    
     if (!apiResponse.success) {
       throw new Error(apiResponse.message || "API call failed");
     }
@@ -39,14 +39,14 @@ type TradingData = z.infer<typeof TradingDataSchema>;
 class DashboardApi {
   async getDummyData(): Promise<TradingData> {
     return safeApiCall(
-      () => api.get<ApiResponse<unknown>>("/trading-data"),
+      () => api.get("/trading-data"),
       TradingDataSchema
     );
   }
 
   async getTradingHistory(): Promise<TradingData[]> {
     return safeApiCall(
-      () => api.get<ApiResponse<unknown>>("/trading-history"),
+      () => api.get("/trading-history"),
       z.array(TradingDataSchema)
     );
   }
